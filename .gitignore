@@ -1,0 +1,12 @@
+# Python
+# Environments
+.env
+.venv
+env
+venv
+
+# IDE
+# JetBrains
+.idea
+# VSCode
+.vscode
