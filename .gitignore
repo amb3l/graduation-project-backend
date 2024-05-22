@@ -13,3 +13,6 @@ venv
 
 # DB
 *.sqlite3
+
+# Migrations
+*migrations
