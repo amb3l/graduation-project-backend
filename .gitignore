@@ -10,3 +10,7 @@ venv
 .idea
 # VSCode
 .vscode
+
+# DB
+*.sqlite3
+*.
