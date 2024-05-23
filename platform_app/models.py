@@ -1,12 +1,12 @@
-from django.db.models import Model, CharField
-from django.contrib.gis.db.models import PointField
+from django.db import models
 
 
-class PlatformModel(Model):
-    name = CharField(max_length=50)
-    city = CharField(max_length=100)
-    address = CharField(max_length=100)
-    coordinates = PointField()
+class PlatformModel(models.Model):
+    name = models.CharField(max_length=50)
+    city = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    x = models.FloatField()
+    y = models.FloatField()
 
     @property
     def full_address(self):
