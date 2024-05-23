@@ -1,20 +1,24 @@
 from rest_framework import serializers
 
-from .models import PlatformModel
+from .models import CoordinateModel, PlatformModel
+
+
+class CoordinateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CoordinateModel
+        fields = '__all__'
 
 
 class PlatformSerializer(serializers.ModelSerializer):
-    coordinates = serializers.SerializerMethodField()
-
-    def get_coordinates(self):
-        x = self.Meta.model.x
-        y = self.Meta.model.y
-
-        return [x, y]
+    coordinates = CoordinateSerializer(many=True)
 
     def create(self, validated_data):
-        platform = PlatformModel(**validated_data)
-        platform.save()
+        coordinates = validated_data.pop('coordinates')
+        platform = PlatformModel.objects.create(**validated_data)
+
+        for coordinate in coordinates:
+            coordinate, created = CoordinateModel.objects.get_or_create(x=coordinate['x'], y=coordinate['y'])
+            platform.ingredients.add(coordinate)
 
         return platform
 

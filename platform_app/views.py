@@ -26,5 +26,6 @@ class ListPlatformsView(APIView):
     queryset = PlatformModel.objects.all()
     permission_classes = (AllowAny,)
 
-    def get(self, request):
-        return Response(self.queryset.all())
+    def get(self, _):
+        serializer = PlatformSerializer(self.queryset.all(), many=True)
+        return Response(serializer.data)

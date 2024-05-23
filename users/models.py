@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractUser
 
-from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 
 
 class UserManager(BaseUserManager):
@@ -11,6 +11,8 @@ class UserManager(BaseUserManager):
             password=None,
             **extra_fields,
     ):
+        extra_fields.setdefault('is_active', True)
+
         values = [email, password]
         field_value_map = dict(zip(self.model.REQUIRED_FIELDS, values))
 
@@ -22,7 +24,7 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             **extra_fields,
         )
-        user.set_password(password)
+        user.set_password(make_password(password))
 
         return user
 
@@ -48,12 +50,11 @@ class UserModel(AbstractUser):
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
 
     username = None
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
-
-    objects = UserManager()
 
     def __str__(self):
         return self.email
