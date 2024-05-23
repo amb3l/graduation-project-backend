@@ -4,11 +4,9 @@
 ```
 pip install pipenv
 
-pipenv shall
+pipenv shell
 
 pipenv install
-
-pipenv sync
 ```
 ## Database creation
 ```
