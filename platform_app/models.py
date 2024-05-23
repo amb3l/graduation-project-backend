@@ -7,6 +7,7 @@ class PlatformModel(models.Model):
     address = models.CharField(max_length=100)
     x = models.FloatField()
     y = models.FloatField()
+    objects = []
 
     @property
     def full_address(self):
