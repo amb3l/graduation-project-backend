@@ -10,6 +10,10 @@ pipenv install
 ```
 ## Database creation
 ```
+python manage.py makemigrations users
+
+python manage.py makemigrations platform_app
+
 python manage.py makemigrations
 
 python manage.py migrate
