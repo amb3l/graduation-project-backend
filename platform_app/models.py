@@ -10,5 +10,11 @@ class PlatformModel(models.Model):
 
     @property
     def full_address(self):
-        return "%s %s" % (self.city, self.address)
+        return f'{self.city} {self.address}'
 
+    @property
+    def coordinates(self):
+        return f'{self.x} {self.y}'
+
+    def __str__(self):
+        return f'{self.pk} | {self.name} | {self.full_address} | {self.coordinates}'
