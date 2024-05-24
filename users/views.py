@@ -1,3 +1,6 @@
+import jwt
+
+from django.conf import settings
 from django.contrib.auth import authenticate
 
 from rest_framework.views import APIView
@@ -84,10 +87,14 @@ class LoginAPIView(APIView):
 
 
 class MeAPIView(APIView):
-    # TODO serializer_class
     queryset = UserModel.objects.all()
     permission_classes = (IsAuthenticated,)
 
     @staticmethod
     def get(request):
-        pass
+        auth_header = request.headers['Authorization']
+        access_token = auth_header.split()[1]
+        user = jwt.decode(jwt=access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
+
+        return Response(UserModel.objects.get(id=user['id']))
+
