@@ -11,7 +11,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_RE
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
-from .serializers import RegistrationSerializer, LoginSerializer
+from .serializers import RegistrationSerializer, LoginSerializer, MeSerializer
 
 
 class RegisterAPIView(APIView):
@@ -87,6 +87,7 @@ class LoginAPIView(APIView):
 
 
 class MeAPIView(APIView):
+    serializer_class = MeSerializer
     queryset = UserModel.objects.all()
     permission_classes = (IsAuthenticated,)
 
@@ -96,5 +97,7 @@ class MeAPIView(APIView):
         access_token = auth_header.split()[1]
         user = jwt.decode(jwt=access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
 
-        return Response(UserModel.objects.get(id=user['id']))
+        serializer = MeSerializer(user)
+
+        return Response(serializer.data)
 

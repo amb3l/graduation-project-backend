@@ -69,3 +69,9 @@ class LoginSerializer(serializers.ModelSerializer):
                 'min_length': 8,
             }
         }
+
+
+class MeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ('id', 'name', 'email')
