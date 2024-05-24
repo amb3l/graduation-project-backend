@@ -22,19 +22,20 @@ class RegisterAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        payload = {
+        user_data = {
             'id': user.id,
             'name': user.name,
             'email': user.email,
         }
 
         refresh_token = RefreshToken.for_user(user)
-        refresh_token.payload.update(payload)
+        refresh_token.payload.update(user_data)
 
         access_token = AccessToken.for_user(user)
-        access_token.payload.update(payload)
+        access_token.payload.update(user_data)
 
         return Response({
+            'me': user_data,
             'refresh': str(refresh_token),
             'access': str(access_token),
         }, status=HTTP_201_CREATED)
@@ -63,18 +64,20 @@ class LoginAPIView(APIView):
                 'error': 'Incorrect credentials!'
             }, status=HTTP_401_UNAUTHORIZED)
 
-        payload = {
+        user_data = {
             'id': user.id,
+            'name': user.name,
             'email': user.email,
         }
 
         refresh_token = RefreshToken.for_user(user)
-        refresh_token.payload.update(payload)
+        refresh_token.payload.update(user_data)
 
         access_token = AccessToken.for_user(user)
-        access_token.payload.update(payload)
+        access_token.payload.update(user_data)
 
         return Response({
+            'me': user_data,
             'refresh': str(refresh_token),
             'access': str(access_token),
         }, status=HTTP_200_OK)
