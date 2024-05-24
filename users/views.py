@@ -81,3 +81,13 @@ class LoginAPIView(APIView):
             'refresh': str(refresh_token),
             'access': str(access_token),
         }, status=HTTP_200_OK)
+
+
+class MeAPIView(APIView):
+    # TODO serializer_class
+    queryset = UserModel.objects.all()
+    permission_classes = (IsAuthenticated,)
+
+    @staticmethod
+    def get(request):
+        pass
