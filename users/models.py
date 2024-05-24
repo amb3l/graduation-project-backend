@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractUser
-
+from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
 
 
@@ -46,15 +45,17 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class UserModel(AbstractUser):
+class UserModel(AbstractUser, PermissionsMixin):
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=True)
 
     username = None
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    objects = UserManager()
 
     def __str__(self):
         return self.email
