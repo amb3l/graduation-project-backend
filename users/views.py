@@ -11,6 +11,16 @@ from .models import UserModel
 from .serializers import RegistrationSerializer, LoginSerializer
 
 
+class GetUsersList(APIView):
+    queryset = UserModel.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get(self, _):
+        return Response({
+            self.queryset.all()
+        }, status=HTTP_200_OK)
+
+
 class RegisterAPIView(APIView):
     serializer_class = RegistrationSerializer
     queryset = UserModel.objects.all()
@@ -84,7 +94,6 @@ class LoginAPIView(APIView):
 
 
 class MeAPIView(APIView):
-    # TODO serializer_class
     queryset = UserModel.objects.all()
     permission_classes = (IsAuthenticated,)
 
