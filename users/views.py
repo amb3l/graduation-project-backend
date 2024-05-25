@@ -36,6 +36,14 @@ class ConfirmPassportAPIView(APIView):
 
         serializer = self.serializer_class()
 
+        if serializer.data.is_authenticated:
+            serializer.data.set_passport_photo()
+
+            return Response(
+                {'message': 'Successful passport confirmation!'},
+                status=HTTP_200_OK,
+            )
+
 
 class GetUserByIdAPIView(APIView):
     serializer_class = GetUserByIdSerializer

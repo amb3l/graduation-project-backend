@@ -74,8 +74,8 @@ class UserModel(AbstractUser, PermissionsMixin):
     def deactivate(self):
         self.is_active = False
 
-    def confirm_passport(self):
-        if self.passport_photo:
+    def set_passport_photo(self, passport_photo):
+        if passport_photo:
             self.is_passport_confirmed = True
 
     @property
