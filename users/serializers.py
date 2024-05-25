@@ -4,6 +4,17 @@ from rest_framework import serializers
 
 from .models import UserModel
 
+GET_UNAUTHORIZED_EXCLUDE_FIELDS = (
+    'user_permissions',
+    'password',
+    'first_name',
+    'last_name',
+    'is_superuser',
+    'is_staff',
+    'is_active',
+    'groups',
+)
+
 
 class GetUserByIdSerializer(serializers.ModelSerializer):
     @staticmethod
@@ -12,9 +23,7 @@ class GetUserByIdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        exclude = (
-            'password',
-        )
+        exclude = GET_UNAUTHORIZED_EXCLUDE_FIELDS
 
 
 class GetListUsersSerializer(serializers.ModelSerializer):
@@ -24,16 +33,7 @@ class GetListUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        exclude = (
-            'user_permissions',
-            'password',
-            'first_name',
-            'last_name',
-            'is_superuser',
-            'is_staff',
-            'is_active',
-            'groups',
-        )
+        exclude = GET_UNAUTHORIZED_EXCLUDE_FIELDS
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
