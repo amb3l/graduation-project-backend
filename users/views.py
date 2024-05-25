@@ -124,11 +124,16 @@ class LoginAPIView(APIView):
         access_token = AccessToken.for_user(user)
         access_token.payload.update(user_data)
 
-        return Response({
+        data = {
             'me': user_data,
             'refresh': str(refresh_token),
             'access': str(access_token),
-        }, status=HTTP_200_OK)
+        }
+
+        return Response(
+            data,
+            status=HTTP_200_OK
+        )
 
 
 class MeAPIView(APIView):
@@ -144,5 +149,8 @@ class MeAPIView(APIView):
 
         serializer = MeSerializer(user)
 
-        return Response(serializer.data)
+        return Response(
+            serializer.data,
+            status=HTTP_200_OK,
+        )
 
