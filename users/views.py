@@ -17,9 +17,15 @@ class GetUsersListView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, _):
-        return Response({
-            UserModel.objects.all()
-        }, status=HTTP_200_OK)
+        serializer = self.serializer_class(
+            self.queryset.all(),
+            many=True,
+        )
+
+        return Response(
+            serializer.data,
+            status=HTTP_200_OK,
+        )
 
 
 class RegisterAPIView(APIView):
