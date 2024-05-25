@@ -73,6 +73,7 @@ class LoginSerializer(serializers.ModelSerializer):
             )
 
         user = authenticate(email, password)
+        user.update_last_login()
 
         if user is None:
             raise serializers.ValidationError(
@@ -84,15 +85,11 @@ class LoginSerializer(serializers.ModelSerializer):
                 'This user has been deactivated.'
             )
 
-        return {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-        }
+        return user
 
     class Meta:
         model = UserModel
-        fields = ('id', 'name', 'email', 'password')
+        fields = ('id', 'name', 'email', 'password', 'last_login')
         extra_kwargs = {
             'password': {
                 'write_only': True,

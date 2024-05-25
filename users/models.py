@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
@@ -46,16 +48,22 @@ class UserManager(BaseUserManager):
 
 
 class UserModel(AbstractUser, PermissionsMixin):
+    username = None
+
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=True)
 
-    username = None
+    last_login = models.DateTimeField(default=timezone.now())
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    def update_last_login(self):
+        self.last_login = timezone.now()
 
     def __str__(self):
         return self.email

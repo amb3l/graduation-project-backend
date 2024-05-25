@@ -1,7 +1,11 @@
-import jwt
+import jwt, json
+
+
+from django.utils import timezone
 
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.serializers.json import DjangoJSONEncoder
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -109,6 +113,7 @@ class LoginAPIView(APIView):
 
         user_data = {
             'id': user.id,
+            'last_login': json.dumps(timezone.now(), cls=DjangoJSONEncoder),
             'name': user.name,
             'email': user.email,
         }
