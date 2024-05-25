@@ -52,7 +52,6 @@ class GetUsersListAPIView(APIView):
             serializer.data,
             status=HTTP_200_OK,
         )
-from .serializers import RegistrationSerializer, LoginSerializer, MeSerializer
 
 
 class RegisterAPIView(APIView):
