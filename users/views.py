@@ -16,6 +16,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
 from .serializers import (
+    ConfirmPassportSerializer,
     RegistrationSerializer,
     LoginSerializer,
     MeSerializer,
@@ -23,6 +24,17 @@ from .serializers import (
     GetListUsersSerializer,
     GetUserByIdSerializer,
 )
+
+
+class ConfirmPassportAPIView(APIView):
+    serializer_class = ConfirmPassportSerializer
+    queryset = UserModel.objects.all()
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        passport_photo = request.data['passport_data']
+
+        serializer = self.serializer_class()
 
 
 class GetUserByIdAPIView(APIView):
@@ -81,11 +93,16 @@ class RegisterAPIView(APIView):
         access_token = AccessToken.for_user(user)
         access_token.payload.update(user_data)
 
-        return Response({
-            'me': user_data,
-            'refresh': str(refresh_token),
-            'access': str(access_token),
-        }, status=HTTP_201_CREATED)
+        if user.is_authenticated:
+            return Response({
+                'me': user.data_for_me,
+                'refresh': str(refresh_token),
+                'access': str(access_token),
+            }, status=HTTP_201_CREATED)
+        return Response(
+            {'error': 'Not authenticated!'},
+            status=HTTP_401_UNAUTHORIZED,
+        )
 
 
 class LoginAPIView(APIView):
@@ -125,14 +142,19 @@ class LoginAPIView(APIView):
         access_token.payload.update(user_data)
 
         data = {
-            'me': user_data,
+            'me': user.data_for_me,
             'refresh': str(refresh_token),
             'access': str(access_token),
         }
 
+        if user.is_authenticated:
+            return Response(
+                data,
+                status=HTTP_201_CREATED,
+            )
         return Response(
-            data,
-            status=HTTP_200_OK
+            {'error': 'Not authenticated!'},
+            status=HTTP_401_UNAUTHORIZED,
         )
 
 
@@ -141,16 +163,21 @@ class MeAPIView(APIView):
     queryset = UserModel.objects.all()
     permission_classes = (IsAuthenticated,)
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         auth_header = request.headers['Authorization']
         access_token = auth_header.split()[1]
-        user = jwt.decode(jwt=access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
+        decoded_token = jwt.decode(jwt=access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
 
-        serializer = MeSerializer(user)
+        serializer = self.serializer_class(decoded_token)
+        user = self.queryset.get(id=decoded_token['id'])
 
+        if user.is_authenticated:
+            return Response(
+                serializer.data,
+                status=HTTP_200_OK,
+            )
         return Response(
-            serializer.data,
-            status=HTTP_200_OK,
+            {'error': 'Not authenticated!'},
+            status=HTTP_401_UNAUTHORIZED,
         )
 

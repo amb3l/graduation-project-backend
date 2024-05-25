@@ -4,16 +4,19 @@ from rest_framework import serializers
 
 from .models import UserModel
 
-GET_UNAUTHORIZED_EXCLUDE_FIELDS = (
-    'user_permissions',
-    'password',
-    'first_name',
-    'last_name',
-    'is_superuser',
-    'is_staff',
-    'is_active',
-    'groups',
+GET_UNAUTHORIZED_FIELDS = (
+    'id',
+    'name',
+    'email',
+    'last_login',
+    'date_joined',
 )
+
+
+class ConfirmPassportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ('passport_photo',)
 
 
 class GetUserByIdSerializer(serializers.ModelSerializer):
@@ -23,7 +26,7 @@ class GetUserByIdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        exclude = GET_UNAUTHORIZED_EXCLUDE_FIELDS
+        fields = GET_UNAUTHORIZED_FIELDS
 
 
 class GetListUsersSerializer(serializers.ModelSerializer):
@@ -33,7 +36,7 @@ class GetListUsersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        exclude = GET_UNAUTHORIZED_EXCLUDE_FIELDS
+        fields = GET_UNAUTHORIZED_FIELDS
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -41,9 +44,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = UserModel(**validated_data)
         user.set_password(password)
+        user.update_last_login()
         user.save()
 
-        return user
+        return user.data_for_me
 
     class Meta:
         model = UserModel
@@ -85,11 +89,11 @@ class LoginSerializer(serializers.ModelSerializer):
                 'This user has been deactivated.'
             )
 
-        return user
+        return user.data_for_me
 
     class Meta:
         model = UserModel
-        fields = ('id', 'name', 'email', 'password', 'last_login')
+        fields = ('id', 'name', 'email', 'password')
         extra_kwargs = {
             'password': {
                 'write_only': True,

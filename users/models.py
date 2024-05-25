@@ -53,7 +53,10 @@ class UserModel(AbstractUser, PermissionsMixin):
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
+    passport_photo = models.FileField()
+
     is_active = models.BooleanField(default=True)
+    is_passport_confirmed = models.BooleanField(default=False)
 
     last_login = models.DateTimeField(default=timezone.now())
 
@@ -64,6 +67,34 @@ class UserModel(AbstractUser, PermissionsMixin):
 
     def update_last_login(self):
         self.last_login = timezone.now()
+
+    def activate(self):
+        self.is_active = True
+
+    def deactivate(self):
+        self.is_active = False
+
+    def confirm_passport(self):
+        if self.passport_photo:
+            self.is_passport_confirmed = True
+
+    @property
+    def data_for_guest(self):
+        return {
+            'id': self.pk,
+            'name': self.name,
+            'email': self.email,
+            'date_joined': self.date_joined,
+            'last_login': self.last_login,
+        }
+
+    @property
+    def data_for_me(self):
+        return {
+            'id': self.pk,
+            'name': self.name,
+            'email': self.email,
+        }
 
     def __str__(self):
         return self.email
