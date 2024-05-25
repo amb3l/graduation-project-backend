@@ -11,6 +11,47 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_RE
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
+from .serializers import (
+    RegistrationSerializer,
+    LoginSerializer,
+    MeSerializer,
+
+    GetListUsersSerializer,
+    GetUserByIdSerializer,
+)
+
+
+class GetUserByIdAPIView(APIView):
+    serializer_class = GetUserByIdSerializer
+    queryset = UserModel.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get(self, _, id):
+        serializer = self.serializer_class(
+            self.queryset.get(id=id)
+        )
+
+        return Response(
+            serializer.data,
+            status=HTTP_200_OK,
+        )
+
+
+class GetUsersListAPIView(APIView):
+    serializer_class = GetListUsersSerializer
+    queryset = UserModel.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get(self, _):
+        serializer = self.serializer_class(
+            self.queryset.all(),
+            many=True,
+        )
+
+        return Response(
+            serializer.data,
+            status=HTTP_200_OK,
+        )
 from .serializers import RegistrationSerializer, LoginSerializer, MeSerializer
 
 

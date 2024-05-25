@@ -5,6 +5,37 @@ from rest_framework import serializers
 from .models import UserModel
 
 
+class GetUserByIdSerializer(serializers.ModelSerializer):
+    @staticmethod
+    def get(validated_data):
+        return validated_data
+
+    class Meta:
+        model = UserModel
+        exclude = (
+            'password',
+        )
+
+
+class GetListUsersSerializer(serializers.ModelSerializer):
+    @staticmethod
+    def get(validated_data):
+        return validated_data
+
+    class Meta:
+        model = UserModel
+        exclude = (
+            'user_permissions',
+            'password',
+            'first_name',
+            'last_name',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'groups',
+        )
+
+
 class RegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
