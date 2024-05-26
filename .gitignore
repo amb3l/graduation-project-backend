@@ -16,3 +16,6 @@ venv
 
 # Migrations
 *migrations
+
+# Media
+media

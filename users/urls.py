@@ -16,5 +16,5 @@ urlpatterns = [
     path('users', GetUsersListAPIView.as_view(), name='user-list'),
     path('users/<int:id>', GetUserByIdAPIView.as_view(), name='user-detail'),
     path('me', MeAPIView.as_view(), name='user-me'),
-    path(r'^users/(?P<passport_photo>[^/]+)$', UploadPassportAPIView.as_view(), name='confirm-passport'),
+    path('me/upload-passport', UploadPassportAPIView.as_view(), name='upload-passport'),
 ]

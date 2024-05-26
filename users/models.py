@@ -47,41 +47,34 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
+def upload_to(instance, filename):
+    return f'passport_photos/{filename}'
+
+
 class UserModel(AbstractUser, PermissionsMixin):
     username = None
 
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
-    passport_photo = models.ForeignKey(
-        to='passport_photos.PassportPhotoModel',
-        on_delete=models.CASCADE,
-        blank=True,
-        unique=True,
-    )
+
+    passport_photo_url = models.ImageField(upload_to=upload_to, default='passport_photos/None/No-img.jpg')
 
     is_active = models.BooleanField(default=True)
-    is_passport_confirmed = models.BooleanField(default=False)
-
-    last_login = models.DateTimeField(default=timezone.now())
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
 
-    def update_last_login(self):
-        self.last_login = timezone.now()
+    def set_passport_photo_url(self, passport_photo_url):
+        self.passport_photo_url = passport_photo_url
 
     def activate(self):
         self.is_active = True
 
     def deactivate(self):
         self.is_active = False
-
-    def set_passport_photo(self, passport_photo):
-        if passport_photo:
-            self.is_passport_confirmed = True
 
     @property
     def data_for_guest(self):

@@ -10,7 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -21,7 +21,6 @@ from rest_framework.status import (
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
-from .renderers import JPEGRenderer, PNGRenderer
 from .serializers import (
     UploadPassportSerializer,
     RegistrationSerializer,
@@ -34,28 +33,43 @@ from .serializers import (
 
 
 class UploadPassportAPIView(APIView):
-    parser_classes = (MultiPartParser, FormParser,)
-    renderer_classes = (JPEGRenderer, PNGRenderer,)
+    queryset = UserModel.objects.all()
     serializer_class = UploadPassportSerializer
-    queryset = UserModel.objects.order_by('-creation_date')
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser, FormParser)
 
     def put(self, request):
-        passport_photo = request.data['passport_data']
+        auth_header = request.headers['Authorization']
+        passport_photo_url = request.data['passport_photo_url']
 
-        serializer = self.serializer_class()
+        print(request.FILES['passport_photo_url'])
 
-        if serializer.data.is_authenticated:
-            serializer.data.set_passport_photo(passport_photo)
+        not_validated_access_token = auth_header.split()[1]
+        access_token = AccessToken(not_validated_access_token)
 
+        if not access_token:
             return Response(
-                {'message': 'Successful passport confirmation!'},
-                status=HTTP_200_OK,
+                {'error': 'Not authorized!'},
+                status=HTTP_401_UNAUTHORIZED,
             )
 
+        decoded_token = jwt.decode(jwt=not_validated_access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
+        user = self.queryset.get(id=decoded_token['id'])
+        user.set_passport_photo_url(passport_photo_url)
+
+        serializer = self.serializer_class(data={'passport_photo_url': passport_photo_url})
+
+        if not serializer.is_valid():
+            return Response(
+                {'error': 'Not authorized!'},
+                status=HTTP_401_UNAUTHORIZED,
+            )
+
+        serializer.save()
+
         return Response(
-            {'error': 'Not allowed!'},
-            status=HTTP_401_UNAUTHORIZED,
+            {'message': 'Image saved!'},
+            status=HTTP_200_OK,
         )
 
 
@@ -152,7 +166,6 @@ class LoginAPIView(APIView):
 
         user_data = {
             'id': user.id,
-            'last_login': json.dumps(timezone.now(), cls=DjangoJSONEncoder),
             'name': user.name,
             'email': user.email,
         }

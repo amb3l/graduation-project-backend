@@ -8,11 +8,14 @@ django = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
+pillow = "*"
 
 [dev-packages]
 django = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.12"
