@@ -53,7 +53,12 @@ class UserModel(AbstractUser, PermissionsMixin):
     name = models.CharField(max_length=255, blank=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
-    passport_photo = models.FileField()
+    passport_photo = models.ForeignKey(
+        to='passport_photos.PassportPhotoModel',
+        on_delete=models.CASCADE,
+        blank=True,
+        unique=True,
+    )
 
     is_active = models.BooleanField(default=True)
     is_passport_confirmed = models.BooleanField(default=False)

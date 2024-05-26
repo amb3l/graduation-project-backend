@@ -9,14 +9,21 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED
+)
 
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
+from .renderers import JPEGRenderer, PNGRenderer
 from .serializers import (
-    ConfirmPassportSerializer,
+    UploadPassportSerializer,
     RegistrationSerializer,
     LoginSerializer,
     MeSerializer,
@@ -26,10 +33,12 @@ from .serializers import (
 )
 
 
-class ConfirmPassportAPIView(APIView):
-    serializer_class = ConfirmPassportSerializer
-    queryset = UserModel.objects.all()
-    permission_classes = (IsAuthenticated,)
+class UploadPassportAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser,)
+    renderer_classes = (JPEGRenderer, PNGRenderer,)
+    serializer_class = UploadPassportSerializer
+    queryset = UserModel.objects.order_by('-creation_date')
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def put(self, request):
         passport_photo = request.data['passport_data']
@@ -37,12 +46,17 @@ class ConfirmPassportAPIView(APIView):
         serializer = self.serializer_class()
 
         if serializer.data.is_authenticated:
-            serializer.data.set_passport_photo()
+            serializer.data.set_passport_photo(passport_photo)
 
             return Response(
                 {'message': 'Successful passport confirmation!'},
                 status=HTTP_200_OK,
             )
+
+        return Response(
+            {'error': 'Not allowed!'},
+            status=HTTP_401_UNAUTHORIZED,
+        )
 
 
 class GetUserByIdAPIView(APIView):

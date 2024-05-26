@@ -13,7 +13,9 @@ GET_UNAUTHORIZED_FIELDS = (
 )
 
 
-class ConfirmPassportSerializer(serializers.ModelSerializer):
+class UploadPassportSerializer(serializers.ModelSerializer):
+    passport_photo = serializers.ImageField(required=False)
+
     class Meta:
         model = UserModel
         fields = ('passport_photo',)
