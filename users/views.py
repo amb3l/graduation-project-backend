@@ -1,11 +1,8 @@
-import jwt, json
+import jwt
 
-
-from django.utils import timezone
 
 from django.conf import settings
 from django.contrib.auth import authenticate
-from django.core.serializers.json import DjangoJSONEncoder
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -22,59 +19,40 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .models import UserModel
 from .serializers import (
-    UploadPassportSerializer,
+    UserSerializer,
     RegistrationSerializer,
-    LoginSerializer,
-    MeSerializer,
-
-    GetListUsersSerializer,
-    GetUserByIdSerializer,
 )
 
 
 class UploadPassportAPIView(APIView):
     queryset = UserModel.objects.all()
-    serializer_class = UploadPassportSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
 
     def put(self, request):
-        auth_header = request.headers['Authorization']
         passport_photo_url = request.data['passport_photo_url']
-
-        print(request.FILES['passport_photo_url'])
-
-        not_validated_access_token = auth_header.split()[1]
-        access_token = AccessToken(not_validated_access_token)
-
-        if not access_token:
-            return Response(
-                {'error': 'Not authorized!'},
-                status=HTTP_401_UNAUTHORIZED,
-            )
-
-        decoded_token = jwt.decode(jwt=not_validated_access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
-        user = self.queryset.get(id=decoded_token['id'])
-        user.set_passport_photo_url(passport_photo_url)
-
-        serializer = self.serializer_class(data={'passport_photo_url': passport_photo_url})
+        user = request.user
+        serializer = self.serializer_class(data={'passport_photo_url': passport_photo_url}, partial=True)
 
         if not serializer.is_valid():
             return Response(
-                {'error': 'Not authorized!'},
-                status=HTTP_401_UNAUTHORIZED,
+                {'error': 'Bad Request!'},
+                status=HTTP_400_BAD_REQUEST,
             )
 
-        serializer.save()
+        serializer.update(user, validated_data={'passport_photo_url': passport_photo_url})
+
+        print(serializer.data)
 
         return Response(
-            {'message': 'Image saved!'},
+            {'message': 'Photo has been assigned to current user!'},
             status=HTTP_200_OK,
         )
 
 
 class GetUserByIdAPIView(APIView):
-    serializer_class = GetUserByIdSerializer
+    serializer_class = UserSerializer
     queryset = UserModel.objects.all()
     permission_classes = (AllowAny,)
 
@@ -90,7 +68,7 @@ class GetUserByIdAPIView(APIView):
 
 
 class GetUsersListAPIView(APIView):
-    serializer_class = GetListUsersSerializer
+    serializer_class = UserSerializer
     queryset = UserModel.objects.all()
     permission_classes = (AllowAny,)
 
@@ -111,9 +89,8 @@ class RegisterAPIView(APIView):
     queryset = UserModel.objects.all()
     permission_classes = (AllowAny,)
 
-    @staticmethod
-    def post(request):
-        serializer = RegistrationSerializer(data=request.data)
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
@@ -135,6 +112,7 @@ class RegisterAPIView(APIView):
                 'refresh': str(refresh_token),
                 'access': str(access_token),
             }, status=HTTP_201_CREATED)
+
         return Response(
             {'error': 'Not authenticated!'},
             status=HTTP_401_UNAUTHORIZED,
@@ -142,7 +120,7 @@ class RegisterAPIView(APIView):
 
 
 class LoginAPIView(APIView):
-    serializer_class = LoginSerializer
+    serializer_class = UserSerializer
     queryset = UserModel.objects.all()
     permission_classes = (AllowAny,)
 
@@ -194,25 +172,14 @@ class LoginAPIView(APIView):
 
 
 class MeAPIView(APIView):
-    serializer_class = MeSerializer
+    serializer_class = UserSerializer
     queryset = UserModel.objects.all()
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        auth_header = request.headers['Authorization']
-        access_token = auth_header.split()[1]
-        decoded_token = jwt.decode(jwt=access_token, key=settings.SECRET_KEY, algorithms=['HS256'])
+        serializer = self.serializer_class(request.user)
 
-        serializer = self.serializer_class(decoded_token)
-        user = self.queryset.get(id=decoded_token['id'])
-
-        if user.is_authenticated:
-            return Response(
-                serializer.data,
-                status=HTTP_200_OK,
-            )
         return Response(
-            {'error': 'Not authenticated!'},
-            status=HTTP_401_UNAUTHORIZED,
+            serializer.data,
+            status=HTTP_200_OK,
         )
-

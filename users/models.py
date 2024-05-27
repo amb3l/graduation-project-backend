@@ -1,5 +1,3 @@
-from django.utils import timezone
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
@@ -54,8 +52,10 @@ def upload_to(instance, filename):
 class UserModel(AbstractUser, PermissionsMixin):
     username = None
 
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     name = models.CharField(max_length=255, blank=True)
-    email = models.CharField(max_length=255, unique=True)
+    email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=128)
 
     passport_photo_url = models.ImageField(upload_to=upload_to, default='passport_photos/None/No-img.jpg')
@@ -69,6 +69,9 @@ class UserModel(AbstractUser, PermissionsMixin):
 
     def set_passport_photo_url(self, passport_photo_url):
         self.passport_photo_url = passport_photo_url
+
+    def get_passport_photo_url(self):
+        return self.passport_photo_url
 
     def activate(self):
         self.is_active = True

@@ -17,5 +17,6 @@ venv
 # Migrations
 *migrations
 
-# Media
+# Static
 media
+static

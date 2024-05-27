@@ -2,44 +2,20 @@ from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
-from passport_photos.serializers import PassportPhotoSerializer
-
 from .models import UserModel
 
-GET_UNAUTHORIZED_FIELDS = (
-    'id',
-    'name',
-    'email',
-    'date_joined',
-)
 
-
-class UploadPassportSerializer(serializers.ModelSerializer):
-    passport_photo_url = serializers.ImageField(max_length=None, use_url=True)
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('passport_photo_url',)
-
-
-class GetUserByIdSerializer(serializers.ModelSerializer):
-    @staticmethod
-    def get(validated_data):
-        return validated_data
-
-    class Meta:
-        model = UserModel
-        fields = GET_UNAUTHORIZED_FIELDS
-
-
-class GetListUsersSerializer(serializers.ModelSerializer):
-    @staticmethod
-    def get(validated_data):
-        return validated_data
-
-    class Meta:
-        model = UserModel
-        fields = GET_UNAUTHORIZED_FIELDS
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+                'max_length': 128,
+                'min_length': 8,
+            }
+        }
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -108,4 +84,4 @@ class LoginSerializer(serializers.ModelSerializer):
 class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('id', 'name', 'email')
+        fields = ('id', 'name', 'email', 'passport_photo_url')
