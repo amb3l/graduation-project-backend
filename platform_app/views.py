@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.status import (
     HTTP_200_OK,
+    HTTP_201_CREATED,
 )
 
 
@@ -17,7 +18,10 @@ class PlatformAPIView(APIView):
 
     def get(self, _):
         serializer = self.serializer_class(self.queryset.all(), many=True)
-        return Response(serializer.data)
+        return Response(
+            serializer.data,
+            status=HTTP_200_OK,
+        )
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -26,5 +30,5 @@ class PlatformAPIView(APIView):
 
         return Response(
             serializer.data,
-            status=HTTP_200_OK,
+            status=HTTP_201_CREATED,
         )

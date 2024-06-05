@@ -32,7 +32,7 @@ class UploadPassportAPIView(APIView):
 
     def put(self, request):
         passport_photo_url = request.data['passport_photo_url']
-        user = request.user
+        me = request.user
         serializer = self.serializer_class(data={'passport_photo_url': passport_photo_url}, partial=True)
 
         if not serializer.is_valid():
@@ -41,9 +41,7 @@ class UploadPassportAPIView(APIView):
                 status=HTTP_400_BAD_REQUEST,
             )
 
-        serializer.update(user, validated_data={'passport_photo_url': passport_photo_url})
-
-        print(serializer.data)
+        serializer.update(me, validated_data={'passport_photo_url': passport_photo_url})
 
         return Response(
             {'message': 'Photo has been assigned to current user!'},
