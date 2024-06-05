@@ -1,9 +1,8 @@
 from django.urls import path
 
-from .views import CreateNewPlatformView, ListPlatformsView
+from .views import PlatformAPIView
 
 
 urlpatterns = [
-    path('', ListPlatformsView.as_view()),
-    path('create', CreateNewPlatformView.as_view()),
+    path('', PlatformAPIView.as_view()),
 ]
