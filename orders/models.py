@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db import models
 
 from users.models import UserModel
@@ -30,7 +28,7 @@ class OrderModel(models.Model):
 
     status = models.CharField(max_length=10, choices=STATUSES, default=STATUSES[ACTIVE])
 
-    date_created = models.DateTimeField(default=datetime.now())
+    date_created = models.DateTimeField(null=True)
     date_canceled = models.DateTimeField(null=True)
     date_received = models.DateTimeField(null=True)
 

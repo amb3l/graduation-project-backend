@@ -11,6 +11,39 @@ from users.serializers import UserSerializer
 from platform_app.serializers import PlatformSerializer
 
 
+class OrderStatusSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(max_length=10)
+
+    CANCELED = OrderModel.STATUSES[OrderModel.CANCELED]
+    RECEIVED = OrderModel.STATUSES[OrderModel.RECEIVED]
+
+    def validate(self, data):
+        if self.instance.status == self.CANCELED:
+            raise serializers.ValidationError({"status": "The order status is already CANCELED"})
+
+        if self.instance.status == self.RECEIVED:
+            raise serializers.ValidationError({"status": "The order status is already RECEIVED"})
+
+        return data
+
+    def update(self, instance, validated_data):
+        instance.status = validated_data.get('status', instance.status)
+
+        if instance.status == self.CANCELED:
+            instance.date_canceled = datetime.now()
+
+        if instance.status == self.RECEIVED:
+            instance.date_received = datetime.now()
+
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = OrderModel
+        fields = ['status', 'date_canceled', 'date_received']
+
+
 class OrderSerializer(serializers.ModelSerializer):
     sender = UserSerializer()
     receiver = UserSerializer()
